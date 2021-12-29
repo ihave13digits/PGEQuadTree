@@ -31,7 +31,7 @@ public:
     {
         Clear(olc::BLACK);
         // Stuff
-        //qt->Draw(this);
+        qt->Draw(this);
         if (GetMouse(0).bPressed) { Point* p = new Point(GetMouseX(), GetMouseY()); qt->AddPoint(p); }
         if (GetKey(olc::Key::R).bPressed) { qt->Reset(); }
         if (GetKey(olc::Key::ENTER).bPressed) { Generate(); }

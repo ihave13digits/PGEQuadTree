@@ -1,2 +1,3 @@
 # PGEQuadTree
-A QuadTree, visualized in olcPGE
+
+A static and dynamic quadtree, visualized with olcPGE.
