@@ -28,6 +28,7 @@ public:
     void RemPoints() { if (points.size() > 0) { points.clear(); } }
     void DelPoint(int index) { if (points[index]) { delete points[index]; points.erase(points.begin()+index); } }
     void DelPoints() { if (points.size() > 0) { for (auto p : points) { delete p; } points.clear(); } }
+    void SetLimit(int lmt) { max_points=lmt; if(NE) NE->SetLimit(lmt); if(NW) NW->SetLimit(lmt); if(SE) SE->SetLimit(lmt); if(SW) SW->SetLimit(lmt);}
 
     std::vector<Point*> GetPoints(Quad* area, std::vector<Point*> pts)
     {
@@ -68,7 +69,7 @@ public:
             if (quad->PointInside(p)) { points.push_back(p); }
             if (points.size() > max_points) { Subdivide(); }
         }
-        else if (subdivided)
+        else
         {
             if      (NE->quad->PointInside(p)) { NE->AddPoint(p); }
             else if (NW->quad->PointInside(p)) { NW->AddPoint(p); }

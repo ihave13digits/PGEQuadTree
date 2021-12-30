@@ -9,13 +9,13 @@ public:
 
     bool paused = true;
 
-    void UpdateQT() { Clear(olc::BLACK); QT::Update(); QT::Draw(this); }
+    void UpdateQT(float dt) { Clear(olc::BLACK); QT::Update(dt); QT::Draw(this); }
 
-    void Update()
+    void Update(float dt)
     {
-        if (!paused) { UpdateQT(); }
+        if (!paused) { UpdateQT(dt); }
         if (GetMouse(0).bPressed) { QT::AddAnt(GetMouseX(), GetMouseY()); }
-        if (GetKey(olc::Key::ENTER).bPressed) { UpdateQT(); }
+        if (GetKey(olc::Key::ENTER).bPressed) { UpdateQT(dt); }
         if (GetKey(olc::Key::R).bPressed) { QT::tree->Reset(); }
         if (GetKey(olc::Key::P).bPressed) { paused = !paused; }
         if (GetKey(olc::Key::A).bPressed) { for (int i = 0; i < 10; i++) { QT::AddAnt(GetMouseX()+(+rand()%50)-25, GetMouseY()+(rand()%50)-25); } }
@@ -32,6 +32,6 @@ public:
     { return true; }
     
     bool OnUserUpdate(float fElapsedTime) override
-    { Clear(olc::BLACK); Update(); return true; }
+    { Clear(olc::BLACK); Update(fElapsedTime); return true; }
 
 };
