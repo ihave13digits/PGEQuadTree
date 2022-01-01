@@ -3,9 +3,9 @@
 //
 
 namespace QT { olc::PixelGameEngine* pge = nullptr; }
-namespace QT { int point_count = 0; int born = 0; int dead = 0; }
+namespace QT { bool desired = true; int point_count = 0; int born = 0; int dead = 0; }
 #include "point.h"
-namespace QT { Point*    closest = new Point(0, 0); std::vector<Point*> requested_points; std::vector<Point*> user_points; }
+namespace QT { Point*    closest = new Point(0, 0); }//std::vector<Point*> requested_points; std::vector<Point*> user_points; }
 #include "quad.h"
 namespace QT { Quad*     senses  = new Quad(0, 0, 0, 0); }
 #include "quadtree.h"
@@ -23,6 +23,7 @@ namespace QT
         pge->DrawStringDecal({ 1.0,9.0 }, "Point Count: "+std::to_string(point_count), olc::WHITE, {1.0,1.0});
     }
 
+    /*
     void GetMousePoint()
     {
         float x = pge->GetMouseX(), y = pge->GetMouseY(), check_size=32;
@@ -30,7 +31,8 @@ namespace QT
         senses->w = check_size*2; senses->h = check_size*2;
         closest->x = x; closest->y = y;
         bool found = false;
-        requested_points.clear(); tree->GetPoints(senses, requested_points);
+        desired = true;
+        requested_points.clear(); tree->GetPoints(senses);
         for (auto p : requested_points)
         {
             float close_distance = closest->Distance(p);
@@ -47,7 +49,8 @@ namespace QT
         senses->w = e->senses*2; senses->h = e->senses*2;
         closest-> x = e->x; closest->y = e->y;
         bool found = false;
-        user_points.clear(); tree->GetPoints(senses, user_points);
+        desired = false;
+        user_points.clear(); tree->GetPoints(senses);
         for (auto p : user_points)
         {
             float close_distance = e->Distance(closest);
@@ -59,7 +62,7 @@ namespace QT
     void Update(float dt)
     {
         point_count = 0; senses->x = 0; senses->y = 0; senses->w = var::width; senses->h = var::height;
-        requested_points.clear(); tree->GetPoints(senses, requested_points);
+        desired = true; requested_points.clear(); tree->GetPoints(senses);
         for (auto p : requested_points)
         { Scan(p); p->Update(dt); point_count++; if (p->in_bounds == false) { var::update_tree = true; } }
         if (var::update_tree)
@@ -70,8 +73,8 @@ namespace QT
             for (auto p : requested_points) { p->in_bounds = true; tree->AddPoint(p); }
         }
     }
-
-    /*
+    */
+    
     void GetMousePoint()
     {
         float x = pge->GetMouseX(), y = pge->GetMouseY(), check_size=32;
@@ -119,6 +122,5 @@ namespace QT
             for (auto p : pts) { p->in_bounds = true; tree->AddPoint(p); }
         }
     }
-    */
 
 }

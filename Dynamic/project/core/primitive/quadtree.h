@@ -30,7 +30,6 @@ public:
     void DelPoints() { if (points.size() > 0) { for (auto p : points) { delete p; } points.clear(); } }
     void SetLimit(int lmt) { max_points=lmt; if(NE) NE->SetLimit(lmt); if(NW) NW->SetLimit(lmt); if(SE) SE->SetLimit(lmt); if(SW) SW->SetLimit(lmt);}
 
-    /*
     std::vector<Point*> GetPoints(Quad* area)
     {
         std::vector<Point*> desired_points;
@@ -60,37 +59,34 @@ public:
         }
         return desired_points;
     }
-    */
 
-    //std::vector<Point*>
-    void GetPoints(Quad* area, std::vector<Point*> desired_points)
+    /*
+    void GetPoints(Quad* area)
     {
         if (!subdivided && (area->Collision(quad) || quad->Collision(area)))
-        { for (auto p : points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+        {
+            if (QT::desired) { for (auto p : points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
+            else         { for (auto p : points) { if (area->PointInside(p)) { QT::user_points.push_back(p); } } }
+        }
         else
         {
-            if (NE) { NE->GetPoints(area, desired_points); }
-            if (NW) { NW->GetPoints(area, desired_points); }
-            if (SE) { SE->GetPoints(area, desired_points); }
-            if (SW) { SW->GetPoints(area, desired_points); }
-            /*
-            if      (!NE->subdivided && (NE->quad->Collision(area) || area->Collision(NE->quad)))
-            { for (auto p : NE->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
-            else if (NE->subdivided  && (NE->quad->Collision(area) || area->Collision(NE->quad))) { NE->GetPoints(area); }
-            if      (!NW->subdivided && (NW->quad->Collision(area) || area->Collision(NW->quad)))
-            { for (auto p : NW->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
-            else if (NW->subdivided  && (NW->quad->Collision(area) || area->Collision(NW->quad))) { NW->GetPoints(area); }
-            if      (!SE->subdivided && (SE->quad->Collision(area) || area->Collision(SE->quad)))
-            { for (auto p : SE->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
-            else if (SE->subdivided  && (SE->quad->Collision(area) || area->Collision(SE->quad))) { SE->GetPoints(area); }
-            if      (!SW->subdivided && (SW->quad->Collision(area) || area->Collision(SW->quad)))
-            { for (auto p : SW->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
-            else if (SW->subdivided  && (SW->quad->Collision(area) || area->Collision(SW->quad))) { SW->GetPoints(area); }
-            */
+            if (QT::desired)
+            {
+                if (NE) { NE->GetPoints(area); }
+                if (NW) { NW->GetPoints(area); }
+                if (SE) { SE->GetPoints(area); }
+                if (SW) { SW->GetPoints(area); }
+            }
+            else
+            {
+                if (NE) { NE->GetPoints(area); }
+                if (NW) { NW->GetPoints(area); }
+                if (SE) { SE->GetPoints(area); }
+                if (SW) { SW->GetPoints(area); }
+            }
         }
-        std::cout <<std::to_string(QT::requested_points.size()) <<", " <<std::to_string(QT::user_points.size()) <<std::endl;
-        //return desired_points;
     }
+    */
 
     bool AddPoint(Point* p)
     {
@@ -135,7 +131,11 @@ public:
 
     void Update()
     {
-        if (!subdivided) { SetLimit(std::max(int(points.size()), 16)/4); }
+        if (!subdivided)
+        {
+            if (NE) delete NE; if (NW) delete NW; if (SE) delete SE; if (SW) delete SW;
+            SetLimit(std::max(int(points.size()), 16)/4);
+        }
         else { NE->Update(); NW->Update(); SE->Update(); SW->Update(); }
     }
 
@@ -143,8 +143,7 @@ public:
     {
         if (!subdivided)
         {
-            std::cout <<depth;
-            //for (int i = 0; i < depth; i++) { std::cout <<"."; }
+            std::cout <<depth <<": ";
             for (auto p : points) { std::cout <<"(" <<p->x <<", " <<p->y <<") "; }
             std::cout <<std::endl;
         }
