@@ -30,39 +30,71 @@ public:
     void DelPoints() { if (points.size() > 0) { for (auto p : points) { delete p; } points.clear(); } }
     void SetLimit(int lmt) { max_points=lmt; if(NE) NE->SetLimit(lmt); if(NW) NW->SetLimit(lmt); if(SE) SE->SetLimit(lmt); if(SW) SW->SetLimit(lmt);}
 
-    std::vector<Point*> GetPoints(Quad* area, std::vector<Point*> pts)
+    /*
+    std::vector<Point*> GetPoints(Quad* area)
     {
         std::vector<Point*> desired_points;
-        //for (auto p : pts) { desired_points.push_back(p); }
-        if (!subdivided && area->Collision(quad)) { for (auto p : points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+        if (!subdivided && (area->Collision(quad) || quad->Collision(area))) { for (auto p : points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
         else
         {
             if (NE->quad->Collision(area) || area->Collision(NE->quad))
             {
-                if (!NE->subdivided)     { for (auto p : NE->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
-                else if (NE->subdivided) { for (auto p : NE->GetPoints(area, desired_points)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                if (!NE->subdivided) { for (auto p : NE->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                else                 { for (auto p : NE->GetPoints(area)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
             }
             if (NW->quad->Collision(area) || area->Collision(NW->quad))
             {
-                if (!NW->subdivided)     { for (auto p : NW->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
-                else if (NW->subdivided) { for (auto p : NW->GetPoints(area, desired_points)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                if (!NW->subdivided) { for (auto p : NW->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                else                 { for (auto p : NW->GetPoints(area)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
             }
             if (SE->quad->Collision(area) || area->Collision(SE->quad))
             {
-                if (!SE->subdivided)     { for (auto p : SE->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
-                else if (SE->subdivided) { for (auto p : SE->GetPoints(area, desired_points)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                if (!SE->subdivided) { for (auto p : SE->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                else                 { for (auto p : SE->GetPoints(area)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
             }
             if (SW->quad->Collision(area) || area->Collision(SW->quad))
             {
-                if (!SW->subdivided)     { for (auto p : SW->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
-                else if (SW->subdivided) { for (auto p : SW->GetPoints(area, desired_points)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                if (!SW->subdivided) { for (auto p : SW->points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+                else                 { for (auto p : SW->GetPoints(area)) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
             }
         }
         return desired_points;
     }
+    */
 
-    void AddPoint(Point* p)
+    //std::vector<Point*>
+    void GetPoints(Quad* area, std::vector<Point*> desired_points)
     {
+        if (!subdivided && (area->Collision(quad) || quad->Collision(area)))
+        { for (auto p : points) { if (area->PointInside(p)) { desired_points.push_back(p); } } }
+        else
+        {
+            if (NE) { NE->GetPoints(area, desired_points); }
+            if (NW) { NW->GetPoints(area, desired_points); }
+            if (SE) { SE->GetPoints(area, desired_points); }
+            if (SW) { SW->GetPoints(area, desired_points); }
+            /*
+            if      (!NE->subdivided && (NE->quad->Collision(area) || area->Collision(NE->quad)))
+            { for (auto p : NE->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
+            else if (NE->subdivided  && (NE->quad->Collision(area) || area->Collision(NE->quad))) { NE->GetPoints(area); }
+            if      (!NW->subdivided && (NW->quad->Collision(area) || area->Collision(NW->quad)))
+            { for (auto p : NW->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
+            else if (NW->subdivided  && (NW->quad->Collision(area) || area->Collision(NW->quad))) { NW->GetPoints(area); }
+            if      (!SE->subdivided && (SE->quad->Collision(area) || area->Collision(SE->quad)))
+            { for (auto p : SE->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
+            else if (SE->subdivided  && (SE->quad->Collision(area) || area->Collision(SE->quad))) { SE->GetPoints(area); }
+            if      (!SW->subdivided && (SW->quad->Collision(area) || area->Collision(SW->quad)))
+            { for (auto p : SW->points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
+            else if (SW->subdivided  && (SW->quad->Collision(area) || area->Collision(SW->quad))) { SW->GetPoints(area); }
+            */
+        }
+        std::cout <<std::to_string(QT::requested_points.size()) <<", " <<std::to_string(QT::user_points.size()) <<std::endl;
+        //return desired_points;
+    }
+
+    bool AddPoint(Point* p)
+    {
+        bool added_point = true;
         p->bx = quad->x; p->by = quad->y; p->bw = quad->x+quad->w; p->bh = quad->y+quad->h;
         if (!subdivided)
         {
@@ -75,7 +107,9 @@ public:
             else if (NW->quad->PointInside(p)) { NW->AddPoint(p); }
             else if (SE->quad->PointInside(p)) { SE->AddPoint(p); }
             else if (SW->quad->PointInside(p)) { SW->AddPoint(p); }
+            else { added_point = false; }
         }
+        return added_point;
     }
 
     void Subdivide()
@@ -101,16 +135,39 @@ public:
 
     void Update()
     {
-        //if (!subdivided) { for (auto p : points) { Scan(p); p->Update(); if (!p->in_bounds) { var::update_tree = true; } } }
-        //else { NE->Update(); NW->Update(); SE->Update(); SW->Update(); }
+        if (!subdivided) { SetLimit(std::max(int(points.size()), 16)/4); }
+        else { NE->Update(); NW->Update(); SE->Update(); SW->Update(); }
+    }
+
+    void PrintTree()
+    {
+        if (!subdivided)
+        {
+            std::cout <<depth;
+            //for (int i = 0; i < depth; i++) { std::cout <<"."; }
+            for (auto p : points) { std::cout <<"(" <<p->x <<", " <<p->y <<") "; }
+            std::cout <<std::endl;
+        }
+        else { NE->PrintTree(); NW->PrintTree(); SE->PrintTree(); SW->PrintTree(); }
     }
 
     void Draw(olc::PixelGameEngine* pge)
     {
+        olc::Pixel c_point = olc::Pixel(255, 0, 0);
+        olc::Pixel c_radius = olc::Pixel(255, 128, 0);
+        olc::Pixel c_senses = olc::Pixel(255, 255, 0);
         if (var::show_quad)   { DrawQuads(pge);  }
-        if (var::show_point)  { DrawPoint(pge);  }
-        if (var::show_radius) { DrawRadius(pge); }
-        if (var::show_senses) { DrawSenses(pge); }
+        
+        if (!subdivided)
+        {
+            for (auto p : points)
+            {
+                if (var::show_point)  { pge->Draw(p->x, p->y, c_point); }
+                if (var::show_radius) { pge->DrawCircle(p->x, p->y, p->radius, c_radius); }
+                if (var::show_senses) { pge->DrawRect(p->x-p->senses, p->y-p->senses, p->senses*2, p->senses*2, c_senses); }
+            }
+        }
+        else { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
     }
 
     void DrawQuads(olc::PixelGameEngine* pge)
@@ -128,7 +185,7 @@ public:
 
     void DrawRadius(olc::PixelGameEngine* pge)
     {
-        olc::Pixel color = olc::Pixel(255, 128, 0);;
+        olc::Pixel color = olc::Pixel(255, 128, 0);
         if (!subdivided) { for (auto p : points) { pge->DrawCircle(p->x, p->y, p->radius, color); } }
         else { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
     }
