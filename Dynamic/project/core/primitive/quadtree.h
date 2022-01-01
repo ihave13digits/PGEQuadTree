@@ -4,7 +4,7 @@ class QuadTree
 public:
 
     bool subdivided = false;
-    int max_points, depth;
+    int max_points, depth, curve;
     std::vector<Point*> points;
     Quad* quad = nullptr;
     QuadTree* NE = nullptr;
@@ -12,7 +12,7 @@ public:
     QuadTree* SE = nullptr;
     QuadTree* SW = nullptr;
 
-    QuadTree(float X, float Y, float W, float H, int P, int D) { quad = new Quad(X,Y,W,H); max_points=P; depth=D; }
+    QuadTree(float X, float Y, float W, float H, int P, int D) { quad = new Quad(X,Y,W,H); curve; depth=D; }
     ~QuadTree()
     {
         delete quad; DelPoints();
@@ -60,34 +60,6 @@ public:
         return desired_points;
     }
 
-    /*
-    void GetPoints(Quad* area)
-    {
-        if (!subdivided && (area->Collision(quad) || quad->Collision(area)))
-        {
-            if (QT::desired) { for (auto p : points) { if (area->PointInside(p)) { QT::requested_points.push_back(p); } } }
-            else         { for (auto p : points) { if (area->PointInside(p)) { QT::user_points.push_back(p); } } }
-        }
-        else
-        {
-            if (QT::desired)
-            {
-                if (NE) { NE->GetPoints(area); }
-                if (NW) { NW->GetPoints(area); }
-                if (SE) { SE->GetPoints(area); }
-                if (SW) { SW->GetPoints(area); }
-            }
-            else
-            {
-                if (NE) { NE->GetPoints(area); }
-                if (NW) { NW->GetPoints(area); }
-                if (SE) { SE->GetPoints(area); }
-                if (SW) { SW->GetPoints(area); }
-            }
-        }
-    }
-    */
-
     bool AddPoint(Point* p)
     {
         bool added_point = true;
@@ -134,7 +106,7 @@ public:
         if (!subdivided)
         {
             if (NE) delete NE; if (NW) delete NW; if (SE) delete SE; if (SW) delete SW;
-            SetLimit(std::max(int(points.size()), 16)/4);
+            //SetLimit(std::max(int(points.size()), 16)/4);
         }
         else { NE->Update(); NW->Update(); SE->Update(); SW->Update(); }
     }
@@ -150,50 +122,25 @@ public:
         else { NE->PrintTree(); NW->PrintTree(); SE->PrintTree(); SW->PrintTree(); }
     }
 
-    void Draw(olc::PixelGameEngine* pge)
+    void Draw()
     {
         olc::Pixel c_point = olc::Pixel(255, 0, 0);
         olc::Pixel c_radius = olc::Pixel(255, 128, 0);
         olc::Pixel c_senses = olc::Pixel(255, 255, 0);
-        if (var::show_quad)   { DrawQuads(pge);  }
+        if (var::show_quad)   { DrawQuads();  }
         
         if (!subdivided)
         {
             for (auto p : points)
             {
-                if (var::show_point)  { pge->Draw(p->x, p->y, c_point); }
-                if (var::show_radius) { pge->DrawCircle(p->x, p->y, p->radius, c_radius); }
-                if (var::show_senses) { pge->DrawRect(p->x-p->senses, p->y-p->senses, p->senses*2, p->senses*2, c_senses); }
+                if (var::show_point)  { QT::pge->Draw(p->x, p->y, c_point); }
+                if (var::show_radius) { QT::pge->DrawCircle(p->x, p->y, p->radius, c_radius); }
+                if (var::show_senses) { QT::pge->DrawRect(p->x-p->senses, p->y-p->senses, p->senses*2, p->senses*2, c_senses); }
             }
         }
-        else { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
+        else { NE->Draw(); NW->Draw(); SE->Draw(); SW->Draw(); }
     }
 
-    void DrawQuads(olc::PixelGameEngine* pge)
-    {
-        pge-> DrawRect(quad->x, quad->y, quad->w-1, quad->h-1, olc::Pixel(255*int(subdivided), 255*int(1-subdivided), 0));
-        if (subdivided) { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
-    }
-
-    void DrawPoint(olc::PixelGameEngine* pge)
-    {
-        olc::Pixel color = olc::Pixel(255, 0, 0);
-        if (!subdivided) { for (auto p : points) { pge->Draw(p->x, p->y, color); } }
-        else { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
-    }
-
-    void DrawRadius(olc::PixelGameEngine* pge)
-    {
-        olc::Pixel color = olc::Pixel(255, 128, 0);
-        if (!subdivided) { for (auto p : points) { pge->DrawCircle(p->x, p->y, p->radius, color); } }
-        else { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
-    }
-
-    void DrawSenses(olc::PixelGameEngine* pge)
-    {
-        olc::Pixel color = olc::Pixel(255, 255, 0);
-        if (!subdivided) { for (auto p : points) { pge->DrawRect(p->x-p->senses, p->y-p->senses, p->senses*2, p->senses*2, color); } }
-        else { NE->Draw(pge); NW->Draw(pge); SE->Draw(pge); SW->Draw(pge); }
-    }
+    void DrawQuads() { QT::pge-> DrawRect(quad->x, quad->y, quad->w-1, quad->h-1, olc::Pixel(255-int(255/std::max(depth, 1)), int(255/std::max(depth, 1)), 0)); }
 
 };
